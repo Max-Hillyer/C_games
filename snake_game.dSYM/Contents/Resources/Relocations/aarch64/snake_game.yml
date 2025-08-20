@@ -1,0 +1,21 @@
+---
+triple:          'arm64-apple-darwin'
+binary-path:     '/Users/maxhillyer/Desktop/C_games/snake_game'
+relocations:
+  - { offset: 0x26, size: 0x8, addend: 0x0, symName: _main, symObjAddr: 0x0, symBinAddr: 0x1000032C4, symSize: 0x50 }
+  - { offset: 0x4D, size: 0x8, addend: 0x0, symName: _original_termios, symObjAddr: 0x1FC0, symBinAddr: 0x100008000, symSize: 0x0 }
+  - { offset: 0x105, size: 0x8, addend: 0x0, symName: _snake, symObjAddr: 0x2008, symBinAddr: 0x100008048, symSize: 0x0 }
+  - { offset: 0x155, size: 0x8, addend: 0x0, symName: _current_direction, symObjAddr: 0x2094, symBinAddr: 0x1000080D4, symSize: 0x0 }
+  - { offset: 0x1A3, size: 0x8, addend: 0x0, symName: _board, symObjAddr: 0x2030, symBinAddr: 0x100008070, symSize: 0x0 }
+  - { offset: 0x1CA, size: 0x8, addend: 0x0, symName: _snake_head, symObjAddr: 0x2090, symBinAddr: 0x1000080D0, symSize: 0x0 }
+  - { offset: 0x1D3, size: 0x8, addend: 0x0, symName: _main, symObjAddr: 0x0, symBinAddr: 0x1000032C4, symSize: 0x50 }
+  - { offset: 0x1EC, size: 0x8, addend: 0x0, symName: _setup_terminal, symObjAddr: 0x50, symBinAddr: 0x100003314, symSize: 0xB0 }
+  - { offset: 0x210, size: 0x8, addend: 0x0, symName: _init_snake, symObjAddr: 0x100, symBinAddr: 0x1000033C4, symSize: 0x60 }
+  - { offset: 0x250, size: 0x8, addend: 0x0, symName: _update_game, symObjAddr: 0x160, symBinAddr: 0x100003424, symSize: 0x1D0 }
+  - { offset: 0x2BA, size: 0x8, addend: 0x0, symName: _process_input, symObjAddr: 0x330, symBinAddr: 0x1000035F4, symSize: 0x1A0 }
+  - { offset: 0x316, size: 0x8, addend: 0x0, symName: _has_input, symObjAddr: 0x640, symBinAddr: 0x100003904, symSize: 0x78 }
+  - { offset: 0x33E, size: 0x8, addend: 0x0, symName: _read_char, symObjAddr: 0x6B8, symBinAddr: 0x10000397C, symSize: 0x18 }
+  - { offset: 0x357, size: 0x8, addend: 0x0, symName: _move_snake, symObjAddr: 0x6D0, symBinAddr: 0x100003994, symSize: 0x158 }
+  - { offset: 0x37B, size: 0x8, addend: 0x0, symName: _cleanup_terminal, symObjAddr: 0x83C, symBinAddr: 0x100003B00, symSize: 0x24 }
+  - { offset: 0x390, size: 0x8, addend: 0x0, symName: _render_frame, symObjAddr: 0x860, symBinAddr: 0x100003B24, symSize: 0x2B0 }
+...
