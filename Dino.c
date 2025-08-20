@@ -14,19 +14,20 @@
     #define CLEAR_CMD "clear"
 #endif
 
-#define TICK_RATE 10
+#define TICK_RATE 60
 #define MICROSECONDS_PER_TICK (1000000 / TICK_RATE)
 #define FLOOR_LENGTH 50
 #define GAME_HEIGHT 5
 #define DINO_X_POSITION 5
 #define MAX_JUMP_HEIGHT 3
 #define MAX_OBSTACLES 10
-#define MIN_OBSTACLE_SPACING 4
-#define OBSTACLE_SPAWN_CHANCE 100
+#define MIN_OBSTACLE_SPACING 8
+#define OBSTACLE_SPAWN_CHANCE 5
 
 typedef struct {
     int x;
     bool active;
+    int move_timer;
 } Obstacle;
 
 static struct termios original_termios;
@@ -34,6 +35,8 @@ bool jumping = false;
 int ticks_since_jump = 0;
 Obstacle obstacles[MAX_OBSTACLES];
 int last_obstacle_x = FLOOR_LENGTH + MIN_OBSTACLE_SPACING;
+int score = 0;
+
 
 #ifndef _WIN32
 static void setup_terminal() {
@@ -89,11 +92,12 @@ static void init_obstacles() {
     for (int i = 0; i < MAX_OBSTACLES; i++) {
         obstacles[i].active = false;
         obstacles[i].x = 0;
+        obstacles[i].move_timer = 0;
     }
 }
 
 static void spawn_obstacle() {
-    if (last_obstacle_x < FLOOR_LENGTH - MIN_OBSTACLE_SPACING) {
+    if (last_obstacle_x < MIN_OBSTACLE_SPACING) {
         return;
     }
     if (rand() % 100 >= OBSTACLE_SPAWN_CHANCE) {
@@ -104,6 +108,7 @@ static void spawn_obstacle() {
         if (!obstacles[i].active) {
             obstacles[i].active = true;
             obstacles[i].x = FLOOR_LENGTH - 1;
+            obstacles[i].move_timer = 0;
             last_obstacle_x = 0; 
             break;
         }
@@ -115,9 +120,13 @@ static void update_obstacles() {
     
     for (int i = 0; i < MAX_OBSTACLES; i++) {
         if (obstacles[i].active) {
-            obstacles[i].x--;
+            obstacles[i].move_timer++;
+
+            if (obstacles[i].move_timer >= 2) {
+                obstacles[i].x--;
+                obstacles[i].move_timer = 0;
+            }
             
-            // Deactivate obstacles that have moved off screen
             if (obstacles[i].x < 0) {
                 obstacles[i].active = false;
             }
@@ -148,7 +157,6 @@ static bool check_collision() {
     
     for (int i = 0; i < MAX_OBSTACLES; i++) {
         if (obstacles[i].active) {
-            // Check if dinosaur and obstacle occupy the same position
             if (obstacles[i].x == DINO_X_POSITION && dino_y == GAME_HEIGHT - 1) {
                 return true;
             }
@@ -193,7 +201,6 @@ static void update_game() {
     
     update_obstacles();
     
-    // Check for collision
     if (check_collision()) {
         cleanup_terminal();
         printf("\nCOLLISION! Game Over\n");
@@ -218,10 +225,9 @@ static void render_frame() {
         for (int x = 0; x < FLOOR_LENGTH; x++) {
             bool obstacle_here = false;
             
-            // Check if there's an obstacle at this position
             for (int i = 0; i < MAX_OBSTACLES; i++) {
                 if (obstacles[i].active && obstacles[i].x == x && y == GAME_HEIGHT - 1) {
-                    printf("| ");
+                    printf("\033[32m|\033[0m ");
                     obstacle_here = true;
                     break;
                 }
@@ -255,13 +261,13 @@ static void render_frame() {
 }
 
 int main() {
-    // Seed random number generator
     srand(time(NULL));
     
     setup_terminal();
     init_obstacles();
     
     while(true) {
+        score++;
         update_game();
         render_frame();
         usleep(MICROSECONDS_PER_TICK);
