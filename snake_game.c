@@ -247,7 +247,13 @@ static void render_frame() {
     for (int y = 0; y < BOARD_HEIGHT; y++) {
         printf("│");
         for (int x = 0; x < BOARD_WIDTH; x++) {
-            printf("%c ", board[y][x]);
+            if (board[y][x] == '@') {
+                printf("\033[32m@\033[0m ");
+            } else if (board[y][x] == '#') {
+                printf("\033[31m#\033[0m ");
+            } else {
+                printf("%c ", board[y][x]);
+            }
         }
         printf("│\n");
     }
