@@ -213,7 +213,6 @@ static void render_frame() {
     
     printf("\n");
     
-    // Top border
     printf("┌");
     for (int x = 0; x < FLOOR_LENGTH; x++) printf("──");
     printf("┐\n");
@@ -243,20 +242,17 @@ static void render_frame() {
         }
         printf("│\n");
     }
-    
-    // Bottom border
+
     printf("└");
     for (int x = 0; x < FLOOR_LENGTH; x++) printf("──");
     printf("┘\n");
-    
-    // Status information
+
     int active_obstacles = 0;
     for (int i = 0; i < MAX_OBSTACLES; i++) {
         if (obstacles[i].active) active_obstacles++;
     }
     
-    printf("\nDino Y: %d | Jumping: %s | Active obstacles: %d\n",
-           dino_y, jumping ? "True" : "False", active_obstacles);
+    printf("Score: %d\n", score);
     printf("Controls: Space to jump, Q to quit\n");
 }
 

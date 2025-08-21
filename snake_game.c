@@ -263,13 +263,7 @@ static void render_frame() {
     printf("┘\n");
     
     printf("\nControls: Arrow keys or WASD to move, Q to quit\n");
-    printf("Head Position: (%d, %d) | Direction: %s | Snake Length: %d | Apple Position (%d,%d)\n", 
-           snake[snake_head].x, snake[snake_head].y,
-           current_direction == DIR_NONE ? "stopped" :
-           current_direction == DIR_UP ? "up" :
-           current_direction == DIR_DOWN ? "down" :
-           current_direction == DIR_LEFT ? "left" : "right",
-           snake_length, apple.x, apple.y);
+    printf("Snake length: %d", snake_length);
 }
 
 
