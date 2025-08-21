@@ -1,13 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h> 
-#ifdef _WIN32
-    #define CLEAR_CMD "cls"
-#else 
-    #define CLEAR_CMD "clear"
-#endif
 
 int main() {
-    system(CLEAR_CMD);
     int input = 0;
     printf("1 - snake game\n"); 
     printf("2 - dinosaur game\n");
