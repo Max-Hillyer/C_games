@@ -18,7 +18,7 @@
 #define MICROSECONDS_PER_TICK (1000000 / TICK_RATE)
 #define BOARD_WIDTH 10
 #define BOARD_HEIGHT 20
-#define FALL_SPEED 30
+
 
 typedef struct {
     int x, y;
@@ -32,6 +32,11 @@ typedef struct {
 
 int board[BOARD_HEIGHT][BOARD_WIDTH] = {0};
 int fall_counter = 0;
+int level = 0;
+int rows_cleared = 0;
+int fall_speed = 30;
+int score = 0;
+int display_rows = 0;
 
 int base_I_piece[4][4] = {
     {0, 0, 0, 0},
@@ -140,6 +145,12 @@ static void init_piece(Piece* piece, int base_shape[4][4]) {
     piece->rotation = 0;
     piece->pos.x = BOARD_WIDTH / 2 - 2;
     piece->pos.y = 0;
+
+    if (!is_valid_pos(piece, piece->pos.x, piece->pos.y, piece->shape)) {
+        printf("Game Over\n");
+        cleanup_terminal();
+        exit(0);
+    }
 }
 
 static bool is_valid_pos(Piece* piece, int new_x, int new_y, int test[4][4]) {
@@ -178,7 +189,29 @@ static void rotate_piece(Piece* piece) {
     } 
 }
 
+static void increment_level() {
+    if (level < 5) {
+        fall_speed--;
+    } else if (level < 10) {
+        fall_speed -= 2;
+    } else if (level < 15) {
+        fall_speed -= 3;
+    }
+    level++;
+    rows_cleared = 0;
+}
+
+static void increment_score(int lines_in_turn) {
+    switch(lines_in_turn) {
+        case 1: score += (40 * (level + 1)); break;
+        case 2: score += (100 * (level + 1)); break;
+        case 3: score += (900 * (level + 1)); break;
+        case 4: score += (1200 * (level + 1)); break;
+    }
+}
+
 static void clear_lines() {
+    int lines_in_turn = 0;
     for (int y = BOARD_HEIGHT - 1; y >= 0; y--) {
         bool full_line = true;
 
@@ -199,10 +232,16 @@ static void clear_lines() {
             for (int x = 0; x < BOARD_WIDTH; x++) {
                 board[0][x] = 0;
             }
-            
             y++;
+            rows_cleared++;
+            display_rows++;
+            lines_in_turn++;
         }
     }
+    if (rows_cleared >= 10) {
+            increment_level();
+    }
+    increment_score(lines_in_turn);
 }
 
 static void move_piece(Piece* piece, int dx, int dy) {
@@ -228,8 +267,7 @@ static void move_piece(Piece* piece, int dx, int dy) {
                 }
             }
             clear_lines();
-        
-
+              
             int new_piece = rand() % 7;
             switch(new_piece) {
                 case 0: init_piece(piece, base_I_piece); break;
@@ -290,6 +328,7 @@ static void render(Piece* piece) {
     printf("|\n");
 
     printf("Controls: WASD/Arrow Keys to move, Space/W/Up to rotate, R to reset, Q to quit\n");
+    printf("Level: %d | Rows cleared: %d | Score: %d", level, display_rows, score);
 }
 
 static void process_input(Piece* current_piece) {
@@ -312,8 +351,6 @@ static void process_input(Piece* current_piece) {
         }
     }
 
-
-    
     switch(key) {
         case 'w': case 'W': case ' ': rotate_piece(current_piece); break;
         case 's': case 'S': move_piece(current_piece, 0, 1); break;
@@ -346,15 +383,18 @@ int main() {
                 case 5: init_piece(&current_piece, base_J_piece); break;
                 case 6: init_piece(&current_piece, base_T_piece); break;
             }
+
     while (true) {
         system(CLEAR_CMD);
         render(&current_piece);
         process_input(&current_piece);
+
         fall_counter++;
-        if (fall_counter >= FALL_SPEED) {
+        if (fall_counter >= fall_speed) {
             move_piece(&current_piece, 0, 1);
             fall_counter = 0;
         }
+
         usleep(MICROSECONDS_PER_TICK);
     }
     cleanup_terminal();
