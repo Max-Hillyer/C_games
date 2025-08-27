@@ -19,7 +19,6 @@
 #define BOARD_WIDTH 10
 #define BOARD_HEIGHT 20
 
-
 typedef struct {
     int x, y;
 } Position;
@@ -145,12 +144,6 @@ static void init_piece(Piece* piece, int base_shape[4][4]) {
     piece->rotation = 0;
     piece->pos.x = BOARD_WIDTH / 2 - 2;
     piece->pos.y = 0;
-
-    if (!is_valid_pos(piece, piece->pos.x, piece->pos.y, piece->shape)) {
-        printf("Game Over\n");
-        cleanup_terminal();
-        exit(0);
-    }
 }
 
 static bool is_valid_pos(Piece* piece, int new_x, int new_y, int test[4][4]) {
@@ -282,6 +275,17 @@ static void move_piece(Piece* piece, int dx, int dy) {
     }   
 }
 
+static bool is_game_over() {
+    for (int y = 0; y < 2; y++) {
+        for (int x = 0; x < BOARD_WIDTH; x++) {
+            if (board[y][x]) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 static void render(Piece* piece) {
     char disp_board[BOARD_HEIGHT][BOARD_WIDTH];
 
@@ -364,7 +368,12 @@ static void process_input(Piece* current_piece) {
         case 'r': case 'R':
             memset(board, 0, sizeof(board));
             init_piece(current_piece, base_I_piece);
-            printf("Game Reset\n");
+            score = 0;
+            level = 0;
+            display_rows = 0;
+            rows_cleared = 0;
+            fall_counter = 0;
+            fall_speed = 30;
             break;
     }
 }
@@ -393,6 +402,11 @@ int main() {
         if (fall_counter >= fall_speed) {
             move_piece(&current_piece, 0, 1);
             fall_counter = 0;
+        }
+
+        if (is_game_over()) {
+            printf("\nGame Over\n");
+            break;
         }
 
         usleep(MICROSECONDS_PER_TICK);
