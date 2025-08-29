@@ -27,9 +27,11 @@ typedef struct {
     Position pos;
     int shape[4][4];
     int rotation;
+    int color;
 } Piece;
 
 int board[BOARD_HEIGHT][BOARD_WIDTH] = {0};
+int color[BOARD_HEIGHT][BOARD_WIDTH] = {0};
 int fall_counter = 0;
 int level = 0;
 int rows_cleared = 0;
@@ -144,6 +146,7 @@ static void init_piece(Piece* piece, int base_shape[4][4]) {
     piece->rotation = 0;
     piece->pos.x = BOARD_WIDTH / 2 - 2;
     piece->pos.y = 0;
+    piece->color = (rand() % 6) + 1;
 }
 
 static bool is_valid_pos(Piece* piece, int new_x, int new_y, int test[4][4]) {
@@ -286,6 +289,17 @@ static bool is_game_over() {
     return false;
 }
 
+static void print_color_block(int color) {
+    switch(color) {
+        case 1: printf("\033[32m[]\033[0m"); break; // Green
+        case 2: printf("\033[31m[]\033[0m"); break; // Red
+        case 3: printf("\033[34m[]\033[0m"); break; // Purple
+        case 4: printf("\033[0;93m[]\033[0m"); break; // Yellow
+        case 5: printf("\033[0;96m[]\033[0m"); break; // Light Cyan
+        case 6: printf("\033[0;95m[]\033[0m"); break; // Pink
+        default: printf("[]"); break;
+    }
+}
 static void render(Piece* piece) {
     char disp_board[BOARD_HEIGHT][BOARD_WIDTH];
 
@@ -304,6 +318,7 @@ static void render(Piece* piece) {
                 if (board_x >= 0 && board_x < BOARD_WIDTH && 
                     board_y >= 0 && board_y < BOARD_HEIGHT) {
                     disp_board[board_y][board_x] = '@';
+                    color[board_y][board_x] = piece->color;
                 }
             }
         }
@@ -316,10 +331,8 @@ static void render(Piece* piece) {
     for (int y = 0; y < BOARD_HEIGHT; y++) {
         printf("|");
         for (int x = 0; x < BOARD_WIDTH; x++) {
-            if (disp_board[y][x] == '#') {
-                printf("[]"); 
-            } else if (disp_board[y][x] == '@') {
-                printf("[]"); 
+            if (disp_board[y][x] == '#' || disp_board[y][x] == '@') {
+                print_color_block(color[y][x]);
             } else {
                 printf("  "); 
             }
