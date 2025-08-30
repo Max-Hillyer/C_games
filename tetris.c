@@ -222,11 +222,13 @@ static void clear_lines() {
             for (int move_y = y; move_y > 0; move_y--) {
                 for (int x = 0; x < BOARD_WIDTH; x++) {
                     board[move_y][x] = board[move_y - 1][x];
+                    color[move_y][x] = color[move_y - 1][x];
                 }
             }
             
             for (int x = 0; x < BOARD_WIDTH; x++) {
                 board[0][x] = 0;
+                color[0][x] = 0;
             }
             y++;
             rows_cleared++;
@@ -248,7 +250,6 @@ static void move_piece(Piece* piece, int dx, int dy) {
         piece->pos.x = x;
         piece->pos.y = y;
     } else {
-
         if (dy > 0) {
             for (int py = 0; py < 4; py++) {
                 for (int px = 0; px < 4; px++) {
@@ -258,6 +259,7 @@ static void move_piece(Piece* piece, int dx, int dy) {
                         if (board_x >= 0 && board_x < BOARD_WIDTH && 
                             board_y >= 0 && board_y < BOARD_HEIGHT) {
                             board[board_y][board_x] = 1;
+                            color[board_y][board_x] = piece->color;
                         }
                     }
                 }
@@ -300,6 +302,7 @@ static void print_color_block(int color) {
         default: printf("[]"); break;
     }
 }
+
 static void render(Piece* piece) {
     char disp_board[BOARD_HEIGHT][BOARD_WIDTH];
 
@@ -318,7 +321,6 @@ static void render(Piece* piece) {
                 if (board_x >= 0 && board_x < BOARD_WIDTH && 
                     board_y >= 0 && board_y < BOARD_HEIGHT) {
                     disp_board[board_y][board_x] = '@';
-                    color[board_y][board_x] = piece->color;
                 }
             }
         }
@@ -329,16 +331,18 @@ static void render(Piece* piece) {
     printf("|\n");
 
     for (int y = 0; y < BOARD_HEIGHT; y++) {
-        printf("|");
-        for (int x = 0; x < BOARD_WIDTH; x++) {
-            if (disp_board[y][x] == '#' || disp_board[y][x] == '@') {
-                print_color_block(color[y][x]);
-            } else {
-                printf("  "); 
-            }
+    printf("|");
+    for (int x = 0; x < BOARD_WIDTH; x++) {
+        if (disp_board[y][x] == '#') {
+            print_color_block(color[y][x]);
+        } else if (disp_board[y][x] == '@') {
+            print_color_block(piece->color); 
+        } else {
+            printf("  "); 
         }
-        printf("|\n");
     }
+    printf("|\n");
+}
 
     printf("|");
     for (int x = 0; x < BOARD_WIDTH; x++) printf("──");
@@ -380,6 +384,7 @@ static void process_input(Piece* current_piece) {
             break;
         case 'r': case 'R':
             memset(board, 0, sizeof(board));
+            memset(color, 0, sizeof(color));
             init_piece(current_piece, base_I_piece);
             score = 0;
             level = 0;
