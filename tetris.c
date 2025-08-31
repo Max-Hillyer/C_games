@@ -38,6 +38,7 @@ int rows_cleared = 0;
 int fall_speed = 30;
 int score = 0;
 int display_rows = 0;
+Piece next_piece;
 
 int base_I_piece[4][4] = {
     {0, 0, 0, 0},
@@ -265,16 +266,17 @@ static void move_piece(Piece* piece, int dx, int dy) {
                 }
             }
             clear_lines();
-              
+
+            *piece = next_piece;
             int new_piece = rand() % 7;
             switch(new_piece) {
-                case 0: init_piece(piece, base_I_piece); break;
-                case 1: init_piece(piece, base_O_piece); break;
-                case 2: init_piece(piece, base_S_piece); break;
-                case 3: init_piece(piece, base_Z_piece); break;
-                case 4: init_piece(piece, base_L_piece); break;
-                case 5: init_piece(piece, base_J_piece); break;
-                case 6: init_piece(piece, base_T_piece); break;
+                case 0: init_piece(&next_piece, base_I_piece); break;
+                case 1: init_piece(&next_piece, base_O_piece); break;
+                case 2: init_piece(&next_piece, base_S_piece); break;
+                case 3: init_piece(&next_piece, base_Z_piece); break;
+                case 4: init_piece(&next_piece, base_L_piece); break;
+                case 5: init_piece(&next_piece, base_J_piece); break;
+                case 6: init_piece(&next_piece, base_T_piece); break;
             }
         }
     }   
@@ -303,7 +305,7 @@ static void print_color_block(int color) {
     }
 }
 
-static void render(Piece* piece) {
+static void render(Piece* piece, Piece* next_piece) {
     char disp_board[BOARD_HEIGHT][BOARD_WIDTH];
 
     for (int y = 0; y < BOARD_HEIGHT; y++) {
@@ -324,7 +326,7 @@ static void render(Piece* piece) {
                 }
             }
         }
-    }
+    } 
 
     printf("|");
     for (int x = 0; x < BOARD_WIDTH; x++) printf("──");
@@ -346,10 +348,37 @@ static void render(Piece* piece) {
 
     printf("|");
     for (int x = 0; x < BOARD_WIDTH; x++) printf("──");
+    printf("|\n\n");
+    printf("Next Piece:\n");
+    printf("|");
+    for (int x = 0; x < 4; x++) printf("──");
+    printf("|\n");
+
+    for (int y = 0; y < 4; y++) {
+        printf("|");
+        for (int x = 0; x < 4; x++) {
+            if (next_piece->shape[y][x]) {
+                print_color_block(next_piece->color);
+            } else {
+                printf("  ");
+            }
+        }
+        printf("|");
+        switch(y) {
+            case 1: printf(" score: %d", score); break;
+            case 2: printf(" level: %d", level);break;
+            case 3: printf(" rows cleared: %d ", rows_cleared);break;
+            default: break;
+        }
+        printf("\n");
+    }
+
+    printf("|");
+    for (int x = 0; x < 4; x++) printf("──");
     printf("|\n");
 
     printf("Controls: WASD/Arrow Keys to move, Space/W/Up to rotate, R to reset, Q to quit\n");
-    printf("Level: %d | Rows cleared: %d | Score: %d", level, display_rows, score);
+    printf("\n");
 }
 
 static void process_input(Piece* current_piece) {
@@ -400,6 +429,7 @@ int main() {
     srand(time(NULL));
     setup_terminal();
     Piece current_piece;
+     
     int new_piece = rand() % 7;
     switch(new_piece) {
                 case 0: init_piece(&current_piece, base_I_piece); break;
@@ -410,10 +440,20 @@ int main() {
                 case 5: init_piece(&current_piece, base_J_piece); break;
                 case 6: init_piece(&current_piece, base_T_piece); break;
             }
+    int new_next_piece = rand() % 7;
+    switch(new_next_piece) {
+                case 0: init_piece(&next_piece, base_I_piece); break;
+                case 1: init_piece(&next_piece, base_O_piece); break;
+                case 2: init_piece(&next_piece, base_S_piece); break;
+                case 3: init_piece(&next_piece, base_Z_piece); break;
+                case 4: init_piece(&next_piece, base_L_piece); break;
+                case 5: init_piece(&next_piece, base_J_piece); break;
+                case 6: init_piece(&next_piece, base_T_piece); break;
+            }
 
     while (true) {
         system(CLEAR_CMD);
-        render(&current_piece);
+        render(&current_piece, &next_piece);
         process_input(&current_piece);
 
         fall_counter++;
