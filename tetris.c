@@ -18,6 +18,7 @@
 #define MICROSECONDS_PER_TICK (1000000 / TICK_RATE)
 #define BOARD_WIDTH 10
 #define BOARD_HEIGHT 20
+#define BLOCK_TYPES 4
 
 typedef struct {
     int x, y;
@@ -39,6 +40,8 @@ int fall_speed = 30;
 int score = 0;
 int display_rows = 0;
 Piece next_piece;
+bool paused = false; 
+int block_appearance = 0;
 
 int base_I_piece[4][4] = {
     {0, 0, 0, 0},
@@ -294,14 +297,21 @@ static bool is_game_over() {
 }
 
 static void print_color_block(int color) {
+    char* block = "[]";
+    switch (block_appearance) {
+        case 0: block = "[]"; break;
+        case 1: block = "██"; break;
+        case 2: block = "░░"; break;
+        case 3: block = "##"; break;
+    }
     switch(color) {
-        case 1: printf("\033[32m[]\033[0m"); break; // Green
-        case 2: printf("\033[31m[]\033[0m"); break; // Red
-        case 3: printf("\033[34m[]\033[0m"); break; // Purple
-        case 4: printf("\033[0;93m[]\033[0m"); break; // Yellow
-        case 5: printf("\033[0;96m[]\033[0m"); break; // Light Cyan
-        case 6: printf("\033[0;95m[]\033[0m"); break; // Pink
-        default: printf("[]"); break;
+        case 1: printf("\033[32m%s\033[0m", block); break; // Green
+        case 2: printf("\033[31m%s\033[0m", block); break; // Red
+        case 3: printf("\033[34m%s\033[0m", block); break; // Blue
+        case 4: printf("\033[93m%s\033[0m", block); break; // Yellow
+        case 5: printf("\033[96m%s\033[0m", block); break; // Cyan
+        case 6: printf("\033[95m%s\033[0m", block); break; // Magenta
+        default: printf("  "); break;
     }
 }
 
@@ -365,9 +375,10 @@ static void render(Piece* piece, Piece* next_piece) {
         }
         printf("|");
         switch(y) {
-            case 1: printf(" score: %d", score); break;
-            case 2: printf(" level: %d", level);break;
-            case 3: printf(" rows cleared: %d ", rows_cleared);break;
+            case 0: printf(" %s", paused ? "Paused" : ""); break;
+            case 1: printf(" Score: %d", score); break;
+            case 2: printf(" Level: %d", level);break;
+            case 3: printf(" Rows Cleared: %d ", rows_cleared);break;
             default: break;
         }
         printf("\n");
@@ -377,7 +388,7 @@ static void render(Piece* piece, Piece* next_piece) {
     for (int x = 0; x < 4; x++) printf("──");
     printf("|\n");
 
-    printf("Controls: WASD/Arrow Keys to move, Space/W/Up to rotate, R to reset, Q to quit\n");
+    printf("Controls\n WASD/Arrow Keys to move\n W/Up to rotate\n R to reset\n Q to quit\n Space to pause\n E to change block appearance\n");
     printf("\n");
 }
 
@@ -402,7 +413,7 @@ static void process_input(Piece* current_piece) {
     }
 
     switch(key) {
-        case 'w': case 'W': case ' ': rotate_piece(current_piece); break;
+        case 'w': case 'W': rotate_piece(current_piece); break;
         case 's': case 'S': move_piece(current_piece, 0, 1); break;
         case 'd': case 'D': move_piece(current_piece, 1, 0); break;
         case 'a': case 'A': move_piece(current_piece, -1, 0); break;
@@ -421,6 +432,11 @@ static void process_input(Piece* current_piece) {
             rows_cleared = 0;
             fall_counter = 0;
             fall_speed = 30;
+            break;
+        case ' ': paused = !paused; break;
+        case 'E': case 'e': 
+            block_appearance++;
+            if (block_appearance >= BLOCK_TYPES) block_appearance = 0;
             break;
     }
 }
@@ -452,22 +468,27 @@ int main() {
             }
 
     while (true) {
-        system(CLEAR_CMD);
-        render(&current_piece, &next_piece);
         process_input(&current_piece);
+        if (!paused) {
+            system(CLEAR_CMD);
+            render(&current_piece, &next_piece);
+            fall_counter++;
+            if (fall_counter >= fall_speed) {
+                move_piece(&current_piece, 0, 1);
+                fall_counter = 0;
+            }
 
-        fall_counter++;
-        if (fall_counter >= fall_speed) {
-            move_piece(&current_piece, 0, 1);
-            fall_counter = 0;
+            if (is_game_over()) {
+                printf("\nGame Over\n");
+                break;
+            }
+
+            usleep(MICROSECONDS_PER_TICK);
+        } else {
+            system(CLEAR_CMD);
+            render(&current_piece, &next_piece);
+            usleep(MICROSECONDS_PER_TICK * 100);
         }
-
-        if (is_game_over()) {
-            printf("\nGame Over\n");
-            break;
-        }
-
-        usleep(MICROSECONDS_PER_TICK);
     }
     cleanup_terminal();
     return 0;
