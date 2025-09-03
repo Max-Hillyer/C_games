@@ -38,7 +38,6 @@ int level = 0;
 int rows_cleared = 0;
 int fall_speed = 30;
 int score = 0;
-int display_rows = 0;
 Piece next_piece;
 bool paused = false; 
 int block_appearance = 0;
@@ -198,7 +197,6 @@ static void increment_level() {
         fall_speed -= 3;
     }
     level++;
-    rows_cleared = 0;
 }
 
 static void increment_score(int lines_in_turn) {
@@ -236,11 +234,10 @@ static void clear_lines() {
             }
             y++;
             rows_cleared++;
-            display_rows++;
             lines_in_turn++;
         }
     }
-    if (rows_cleared >= 10) {
+    if (rows_cleared % 10 == 0) {
             increment_level();
     }
     increment_score(lines_in_turn);
@@ -428,15 +425,13 @@ static void process_input(Piece* current_piece) {
             init_piece(current_piece, base_I_piece);
             score = 0;
             level = 0;
-            display_rows = 0;
             rows_cleared = 0;
             fall_counter = 0;
             fall_speed = 30;
             break;
         case ' ': paused = !paused; break;
         case 'E': case 'e': 
-            block_appearance++;
-            if (block_appearance >= BLOCK_TYPES) block_appearance = 0;
+            block_appearance = (block_appearance + 1) % BLOCK_TYPES;
             break;
     }
 }
