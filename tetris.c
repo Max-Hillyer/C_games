@@ -41,6 +41,8 @@ int score = 0;
 Piece next_piece;
 bool paused = false; 
 int block_appearance = 0;
+int col_element = 31;
+bool title_flash_pause = false;
 
 int base_I_piece[4][4] = {
     {0, 0, 0, 0},
@@ -164,10 +166,6 @@ static bool is_valid_pos(Piece* piece, int new_x, int new_y, int test[4][4]) {
                     board[board_y][board_x]) {
                     return false;
                 }
-
-                if (board[board_y][board_x]) {
-                    return false;
-                }
             }
         }
     }
@@ -189,12 +187,14 @@ static void rotate_piece(Piece* piece) {
 }
 
 static void increment_level() {
-    if (level < 5) {
-        fall_speed--;
-    } else if (level < 10) {
-        fall_speed -= 2;
-    } else if (level < 15) {
-        fall_speed -= 3;
+    if (fall_speed > 5) {
+        if (level < 5) {
+            fall_speed--;
+        } else if (level < 10) {
+            fall_speed -= 2;
+        } else if (level < 15) {
+            fall_speed -= 3;
+        }
     }
     level++;
 }
@@ -237,7 +237,7 @@ static void clear_lines() {
             lines_in_turn++;
         }
     }
-    if (rows_cleared % 10 == 0) {
+    if (lines_in_turn > 0 && rows_cleared % 10 == 0) {
             increment_level();
     }
     increment_score(lines_in_turn);
@@ -293,15 +293,15 @@ static bool is_game_over() {
     return false;
 }
 
-static void print_color_block(int color) {
+static void print_color_block(int color_val) {
     char* block = "[]";
     switch (block_appearance) {
-        case 0: block = "[]"; break;
-        case 1: block = "██"; break;
+        case 0: block = "██"; break;
+        case 1: block = "[]"; break;
         case 2: block = "░░"; break;
         case 3: block = "##"; break;
     }
-    switch(color) {
+    switch(color_val) {
         case 1: printf("\033[32m%s\033[0m", block); break; // Green
         case 2: printf("\033[31m%s\033[0m", block); break; // Red
         case 3: printf("\033[34m%s\033[0m", block); break; // Blue
@@ -312,6 +312,19 @@ static void print_color_block(int color) {
     }
 }
 
+static void print_title() {
+    if (fall_counter % 20 == 0 && !title_flash_pause) {
+        int col_list[] = {32, 31, 34, 93, 96, 95};
+        int list_size = sizeof(col_list) / sizeof(col_list[0]);
+        col_element = col_list[rand() % list_size];
+    } 
+    printf("\033[%dm _____    _        _     \n", col_element);
+    printf("|_   _|__| |_ _ __(_)___ \n");
+    printf("  | |/ _ \\ __| '__| / __|\n");
+    printf("  | |  __/ |_| |  | \\__ \\\n");
+    printf("  |_|\\___|\\__|_|  |_|___/\n");
+    printf("                         \n\033[0m");
+}
 static void render(Piece* piece, Piece* next_piece) {
     char disp_board[BOARD_HEIGHT][BOARD_WIDTH];
 
@@ -334,6 +347,7 @@ static void render(Piece* piece, Piece* next_piece) {
             }
         }
     } 
+    print_title();
 
     printf("|");
     for (int x = 0; x < BOARD_WIDTH; x++) printf("──");
@@ -385,7 +399,7 @@ static void render(Piece* piece, Piece* next_piece) {
     for (int x = 0; x < 4; x++) printf("──");
     printf("|\n");
 
-    printf("Controls\n WASD/Arrow Keys to move\n W/Up to rotate\n R to reset\n Q to quit\n Space to pause\n E to change block appearance\n");
+    printf("Controls\n WASD/Arrow Keys to move\n W/Up to rotate\n R to reset\n Q to quit\n Space to pause\n E to change block appearance\n F to stop title flash\n");
     printf("\n");
 }
 
@@ -433,6 +447,7 @@ static void process_input(Piece* current_piece) {
         case 'E': case 'e': 
             block_appearance = (block_appearance + 1) % BLOCK_TYPES;
             break;
+        case 'F': case 'f': title_flash_pause = !title_flash_pause; break;
     }
 }
 
@@ -480,6 +495,7 @@ int main() {
 
             usleep(MICROSECONDS_PER_TICK);
         } else {
+            title_flash_pause = false;
             system(CLEAR_CMD);
             render(&current_piece, &next_piece);
             usleep(MICROSECONDS_PER_TICK * 100);
