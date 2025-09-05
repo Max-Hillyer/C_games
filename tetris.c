@@ -173,17 +173,19 @@ static bool is_valid_pos(Piece* piece, int new_x, int new_y, int test[4][4]) {
 }
 
 static void rotate_piece(Piece* piece) {
-    int temp[4][4];
-    for (int y = 0; y < 4; y++) {
-        for (int x = 0; x < 4; x++) {
-            temp[x][3 - y] = piece->shape[y][x];
+    if (!paused) {
+        int temp[4][4];
+        for (int y = 0; y < 4; y++) {
+            for (int x = 0; x < 4; x++) {
+                temp[x][3 - y] = piece->shape[y][x];
+            }
         }
-    }
 
-    if (is_valid_pos(piece, piece->pos.x, piece->pos.y, temp)) {
-        memcpy(piece->shape, temp, sizeof(temp));
-        piece->rotation = (piece->rotation + 1) % 4;
+        if (is_valid_pos(piece, piece->pos.x, piece->pos.y, temp)) {
+            memcpy(piece->shape, temp, sizeof(temp));
+            piece->rotation = (piece->rotation + 1) % 4;
     } 
+    }
 }
 
 static void increment_level() {
@@ -244,39 +246,41 @@ static void clear_lines() {
 }
 
 static void move_piece(Piece* piece, int dx, int dy) {
-    int x = piece->pos.x + dx;
-    int y = piece->pos.y + dy;
+    if (!paused) {
+        int x = piece->pos.x + dx;
+        int y = piece->pos.y + dy;
 
-    if (is_valid_pos(piece, x, y, piece->shape)) {
-        piece->pos.x = x;
-        piece->pos.y = y;
-    } else {
-        if (dy > 0) {
-            for (int py = 0; py < 4; py++) {
-                for (int px = 0; px < 4; px++) {
-                    if (piece->shape[py][px]) {
-                        int board_x = piece->pos.x + px;
-                        int board_y = piece->pos.y + py;
-                        if (board_x >= 0 && board_x < BOARD_WIDTH && 
-                            board_y >= 0 && board_y < BOARD_HEIGHT) {
-                            board[board_y][board_x] = 1;
-                            color[board_y][board_x] = piece->color;
+        if (is_valid_pos(piece, x, y, piece->shape)) {
+            piece->pos.x = x;
+            piece->pos.y = y;
+        } else {
+            if (dy > 0) {
+                for (int py = 0; py < 4; py++) {
+                    for (int px = 0; px < 4; px++) {
+                        if (piece->shape[py][px]) {
+                            int board_x = piece->pos.x + px;
+                            int board_y = piece->pos.y + py;
+                            if (board_x >= 0 && board_x < BOARD_WIDTH && 
+                                board_y >= 0 && board_y < BOARD_HEIGHT) {
+                                board[board_y][board_x] = 1;
+                                color[board_y][board_x] = piece->color;
+                            }
                         }
                     }
                 }
-            }
-            clear_lines();
+                clear_lines();
 
-            *piece = next_piece;
-            int new_piece = rand() % 7;
-            switch(new_piece) {
-                case 0: init_piece(&next_piece, base_I_piece); break;
-                case 1: init_piece(&next_piece, base_O_piece); break;
-                case 2: init_piece(&next_piece, base_S_piece); break;
-                case 3: init_piece(&next_piece, base_Z_piece); break;
-                case 4: init_piece(&next_piece, base_L_piece); break;
-                case 5: init_piece(&next_piece, base_J_piece); break;
-                case 6: init_piece(&next_piece, base_T_piece); break;
+                *piece = next_piece;
+                int new_piece = rand() % 7;
+                switch(new_piece) {
+                    case 0: init_piece(&next_piece, base_I_piece); break;
+                    case 1: init_piece(&next_piece, base_O_piece); break;
+                    case 2: init_piece(&next_piece, base_S_piece); break;
+                    case 3: init_piece(&next_piece, base_Z_piece); break;
+                    case 4: init_piece(&next_piece, base_L_piece); break;
+                    case 5: init_piece(&next_piece, base_J_piece); break;
+                    case 6: init_piece(&next_piece, base_T_piece); break;
+                }
             }
         }
     }   
@@ -325,6 +329,7 @@ static void print_title() {
     printf("  |_|\\___|\\__|_|  |_|___/\n");
     printf("                         \n\033[0m");
 }
+
 static void render(Piece* piece, Piece* next_piece) {
     char disp_board[BOARD_HEIGHT][BOARD_WIDTH];
 
