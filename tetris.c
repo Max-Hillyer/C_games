@@ -34,8 +34,8 @@ typedef struct {
 int board[BOARD_HEIGHT][BOARD_WIDTH] = {0};
 int color[BOARD_HEIGHT][BOARD_WIDTH] = {0};
 int fall_counter = 0;
-int level = 0;
-int rows_cleared = 0;
+int level = 1;
+int rows_cleared = 19;
 int fall_speed = 30;
 int score = 0;
 Piece next_piece;
@@ -198,7 +198,7 @@ static void increment_level() {
             fall_speed -= 3;
         }
     }
-    level++;
+    level = (rows_cleared / 10) + 1;
 }
 
 static void increment_score(int lines_in_turn) {
