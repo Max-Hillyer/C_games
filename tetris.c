@@ -35,7 +35,7 @@ int board[BOARD_HEIGHT][BOARD_WIDTH] = {0};
 int color[BOARD_HEIGHT][BOARD_WIDTH] = {0};
 int fall_counter = 0;
 int level = 1;
-int rows_cleared = 19;
+int rows_cleared = 0;
 int fall_speed = 30;
 int score = 0;
 Piece next_piece;
