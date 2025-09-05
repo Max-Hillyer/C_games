@@ -441,7 +441,16 @@ static void process_input(Piece* current_piece) {
         case 'r': case 'R':
             memset(board, 0, sizeof(board));
             memset(color, 0, sizeof(color));
-            init_piece(current_piece, base_I_piece);
+            int piece = rand() % 7;
+            switch(piece){ 
+                case 0: init_piece(current_piece, base_I_piece); break;
+                case 1: init_piece(current_piece, base_O_piece); break;
+                case 2: init_piece(current_piece, base_S_piece); break;
+                case 3: init_piece(current_piece, base_Z_piece); break;
+                case 4: init_piece(current_piece, base_L_piece); break;
+                case 5: init_piece(current_piece, base_J_piece); break;
+                case 6: init_piece(current_piece, base_T_piece); break;
+            }
             score = 0;
             level = 0;
             rows_cleared = 0;
