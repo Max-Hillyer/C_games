@@ -14,7 +14,7 @@
     #define CLEAR_CMD "clear"
 #endif
 
-#define TICK_RATE 60
+#define TICK_RATE 120
 #define MICROSECONDS_PER_TICK (1000000 / TICK_RATE)
 #define BOARD_WIDTH 10
 #define BOARD_HEIGHT 20
@@ -92,7 +92,6 @@ int base_T_piece[4][4] = {
     {1, 1, 1, 0},
     {0, 0, 0, 0}
 };
-
 
 #ifndef _WIN32
 static struct termios original_termios;
@@ -451,8 +450,18 @@ static void process_input(Piece* current_piece) {
                 case 5: init_piece(current_piece, base_J_piece); break;
                 case 6: init_piece(current_piece, base_T_piece); break;
             }
+            int new_next_piece = rand() % 7;
+            switch(new_next_piece) {
+                case 0: init_piece(&next_piece, base_I_piece); break;
+                case 1: init_piece(&next_piece, base_O_piece); break;
+                case 2: init_piece(&next_piece, base_S_piece); break;
+                case 3: init_piece(&next_piece, base_Z_piece); break;
+                case 4: init_piece(&next_piece, base_L_piece); break;
+                case 5: init_piece(&next_piece, base_J_piece); break;
+                case 6: init_piece(&next_piece, base_T_piece); break;
+            }
             score = 0;
-            level = 0;
+            level = 1;
             rows_cleared = 0;
             fall_counter = 0;
             fall_speed = 30;
