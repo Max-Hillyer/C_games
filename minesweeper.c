@@ -342,7 +342,7 @@ static void render() {
     }
     printf("┘\n");
 
-    printf("Position: (%d,%d) | Flags Remaining: %d\n Controls\n WASD / Arrow to Move\n Space to Click\n F to Flag\n Q to Quit\n", player_pos.x, player_pos.y, MAX_FLAGS - flags_placed);
+    printf("Position: (%d,%d) | Flags Remaining: %d\n Controls\n WASD / Arrow to Move\n Space to Click\n F to Flag\n Q to Quit\n R to Reset", player_pos.x, player_pos.y, MAX_FLAGS - flags_placed);
     fflush(stdout); 
 }
 
