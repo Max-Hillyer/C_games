@@ -19,6 +19,7 @@
 #define BOARD_WIDTH 10
 #define BOARD_HEIGHT 20
 #define BLOCK_TYPES 4
+#define MAX_SCORES 5
 
 typedef struct {
     int x, y;
@@ -30,6 +31,11 @@ typedef struct {
     int rotation;
     int color;
 } Piece;
+
+typedef struct {
+    int score;
+    char name[16];
+} Highscore; 
 
 int board[BOARD_HEIGHT][BOARD_WIDTH] = {0};
 int color[BOARD_HEIGHT][BOARD_WIDTH] = {0};
@@ -43,55 +49,58 @@ bool paused = false;
 int block_appearance = 0;
 int col_element = 31;
 bool title_flash_pause = false;
+Highscore highscores[MAX_SCORES];
 
-int base_I_piece[4][4] = {
+const int base_I_piece[4][4] = {
     {0, 0, 0, 0},
     {1, 1, 1, 1},
     {0, 0, 0, 0},
     {0, 0, 0, 0}
 };
 
-int base_O_piece[4][4] = {
+const int base_O_piece[4][4] = {
     {0, 0, 0, 0},
     {0, 1, 1, 0},
     {0, 1, 1, 0},
     {0, 0, 0, 0}
 };
 
-int base_S_piece[4][4] = {
+const int base_S_piece[4][4] = {
     {0, 0, 0, 0},
     {0, 1, 1, 0},
     {1, 1, 0, 0},
     {0, 0, 0, 0}
 };
 
-int base_Z_piece[4][4] = {
+const int base_Z_piece[4][4] = {
     {0, 0, 0, 0},
     {1, 1, 0, 0},
     {0, 1, 1, 0},
     {0, 0, 0, 0}
 };
 
-int base_L_piece[4][4] = {
+const int base_L_piece[4][4] = {
     {0, 0, 0, 0},
     {1, 0, 0, 0},
     {1, 0, 0, 0},
     {1, 1, 0, 0}
 };
 
-int base_J_piece[4][4] = {
+const int base_J_piece[4][4] = {
     {0, 0, 0, 0},
     {0, 0, 1, 0},
     {0, 0, 1, 0},
     {0, 1, 1, 0}
 };
 
-int base_T_piece[4][4] = {
+const int base_T_piece[4][4] = {
     {0, 0, 0, 0},
     {0, 1, 0, 0},
     {1, 1, 1, 0},
     {0, 0, 0, 0}
 };
+
+const int (*base_pieces[7])[4] = {base_I_piece, base_J_piece, base_L_piece, base_O_piece, base_S_piece, base_T_piece, base_Z_piece};
 
 #ifndef _WIN32
 static struct termios original_termios;
@@ -145,7 +154,9 @@ static char read_char() {
 }
 #endif
 
-static void init_piece(Piece* piece, int base_shape[4][4]) {
+static void init_piece(Piece* piece) {
+    int piece_id = rand() % 7;
+    const int (*base_shape)[4] = base_pieces[piece_id];
     memcpy(piece->shape, base_shape, sizeof(piece->shape));
     piece->rotation = 0;
     piece->pos.x = BOARD_WIDTH / 2 - 2;
@@ -270,16 +281,7 @@ static void move_piece(Piece* piece, int dx, int dy) {
                 clear_lines();
 
                 *piece = next_piece;
-                int new_piece = rand() % 7;
-                switch(new_piece) {
-                    case 0: init_piece(&next_piece, base_I_piece); break;
-                    case 1: init_piece(&next_piece, base_O_piece); break;
-                    case 2: init_piece(&next_piece, base_S_piece); break;
-                    case 3: init_piece(&next_piece, base_Z_piece); break;
-                    case 4: init_piece(&next_piece, base_L_piece); break;
-                    case 5: init_piece(&next_piece, base_J_piece); break;
-                    case 6: init_piece(&next_piece, base_T_piece); break;
-                }
+                init_piece(&next_piece);
             }
         }
     }   
@@ -440,26 +442,8 @@ static void process_input(Piece* current_piece) {
         case 'r': case 'R':
             memset(board, 0, sizeof(board));
             memset(color, 0, sizeof(color));
-            int piece = rand() % 7;
-            switch(piece){ 
-                case 0: init_piece(current_piece, base_I_piece); break;
-                case 1: init_piece(current_piece, base_O_piece); break;
-                case 2: init_piece(current_piece, base_S_piece); break;
-                case 3: init_piece(current_piece, base_Z_piece); break;
-                case 4: init_piece(current_piece, base_L_piece); break;
-                case 5: init_piece(current_piece, base_J_piece); break;
-                case 6: init_piece(current_piece, base_T_piece); break;
-            }
-            int new_next_piece = rand() % 7;
-            switch(new_next_piece) {
-                case 0: init_piece(&next_piece, base_I_piece); break;
-                case 1: init_piece(&next_piece, base_O_piece); break;
-                case 2: init_piece(&next_piece, base_S_piece); break;
-                case 3: init_piece(&next_piece, base_Z_piece); break;
-                case 4: init_piece(&next_piece, base_L_piece); break;
-                case 5: init_piece(&next_piece, base_J_piece); break;
-                case 6: init_piece(&next_piece, base_T_piece); break;
-            }
+            init_piece(current_piece);
+            init_piece(&next_piece);
             score = 0;
             level = 1;
             rows_cleared = 0;
@@ -479,26 +463,8 @@ int main() {
     setup_terminal();
     Piece current_piece;
      
-    int new_piece = rand() % 7;
-    switch(new_piece) {
-                case 0: init_piece(&current_piece, base_I_piece); break;
-                case 1: init_piece(&current_piece, base_O_piece); break;
-                case 2: init_piece(&current_piece, base_S_piece); break;
-                case 3: init_piece(&current_piece, base_Z_piece); break;
-                case 4: init_piece(&current_piece, base_L_piece); break;
-                case 5: init_piece(&current_piece, base_J_piece); break;
-                case 6: init_piece(&current_piece, base_T_piece); break;
-            }
-    int new_next_piece = rand() % 7;
-    switch(new_next_piece) {
-                case 0: init_piece(&next_piece, base_I_piece); break;
-                case 1: init_piece(&next_piece, base_O_piece); break;
-                case 2: init_piece(&next_piece, base_S_piece); break;
-                case 3: init_piece(&next_piece, base_Z_piece); break;
-                case 4: init_piece(&next_piece, base_L_piece); break;
-                case 5: init_piece(&next_piece, base_J_piece); break;
-                case 6: init_piece(&next_piece, base_T_piece); break;
-            }
+    init_piece(&current_piece);
+    init_piece(&next_piece);
 
     while (true) {
         process_input(&current_piece);
