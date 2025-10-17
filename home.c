@@ -8,6 +8,7 @@ int main() {
     printf("3 - 2048\n");
     printf("4 - tetris\n");
     printf("5 - minesweeper\n");
+    printf("6 - soduko\n");
     printf("> ");
     scanf("%d", &input);
     switch(input) {
@@ -16,6 +17,7 @@ int main() {
         case 3: system("make 2048; ./2048"); break;
         case 4: system("make tetris; ./tetris"); break;
         case 5: system("make minesweeper; ./minesweeper"); break;
+        case 6: system("make soduko; ./soduko"); break;
         default: printf("Invalid input\n"); break;
     }
     return 0;
