@@ -201,17 +201,17 @@ static void gen_board() {
 }
 
 static void render() {
-    printf("┏");
+    printf("╔");
     for (int x = 0; x < BOARD_WIDTH; x++) {
-        printf("━━━");
+        printf("═══");
         if (x < BOARD_WIDTH - 1) {
-            printf("%s", (x % 3 == 2) ? "┳" : "┯");
+            printf("%s", (x % 3 == 2) ? "╦" : "╤");
         }
     }
-    printf("┓\n");
+    printf("╗\n");
 
     for (int y = 0; y < BOARD_HEIGHT; y++) {
-        printf("┃");
+        printf("║");
         for (int x = 0; x < BOARD_WIDTH; x++) {
             bool is_cursor = (x == player_pos.x && y == player_pos.y);
 
@@ -226,7 +226,7 @@ static void render() {
             if (is_cursor) printf("\033[0m");
 
             if (x % 3 == 2) {
-                printf("┃");
+                printf("║");
             } else {
                 printf("│");
             }
@@ -234,38 +234,38 @@ static void render() {
         printf("\n");
 
         if (y < BOARD_HEIGHT - 1) {
-            printf("%s", (y % 3 == 2) ? "┣" : "┠");
+            printf("%s", (y % 3 == 2) ? "╠" : "╟");
 
             for (int x = 0; x < BOARD_WIDTH; x++) {
                 if (y % 3 == 2) { 
-                    printf("━━━");
+                    printf("═══");
                 } else {
                     printf("───");
                 }
                 if (x < BOARD_WIDTH - 1) {
                     if (x % 3 == 2 && y % 3 == 2) {
-                        printf("╋");
+                        printf("╬");
                     } else if(x % 3 == 2) {
-                        printf("╂");
+                        printf("╫");
                     } else if (y % 3 == 2) {
-                        printf("┿");
+                        printf("╪");
                     } else {
                         printf("┼");
                     }
                 }
             }
-            printf("%s\n", (y % 3 == 2) ? "┫" : "┨");
+            printf("%s\n", (y % 3 == 2) ? "╣" : "╢");
         }
     }
 
-    printf("┗");
+    printf("╚");
     for (int x = 0; x < BOARD_WIDTH; x++) {
-        printf("━━━");
+        printf("═══");
         if (x < BOARD_WIDTH - 1) {
-            printf("%s", (x % 3 == 2) ? "┻" : "┷");
+            printf("%s", (x % 3 == 2) ? "╩" : "╧");
         }
     }
-    printf("┛\n");
+    printf("╝\n");
 
     printf("Controls: \nWASD/Arrow Keys to move\nAny number to place a number\nDelete to reset a square\nR to restart\n");
 
