@@ -117,12 +117,70 @@ static bool is_valid_pos(int num, int row, int col) {
     int box_start_col = (col / 3) * 3;
     for (int y = box_start_row; y < box_start_row + 3; y++) {
         for (int x = box_start_col; x < box_start_col + 3; x++) {
-            if ((y != row && x != col) && board[y][x].real_num == num) {
+            if ((y != row || x != col) && board[y][x].real_num == num) {
                 return false;
             }
         }
     }
     return true;
+}
+
+static int count_solutions(int row, int col, int limit) {
+    if (row == BOARD_HEIGHT) return 1;
+    
+    int next_row = (col == BOARD_WIDTH - 1) ? row + 1 : row;
+    int next_col = (col == BOARD_WIDTH - 1) ? 0 : col + 1;
+
+    if (board[row][col].player_num != 0) {
+        return count_solutions(next_row, next_col, limit);
+    }
+    
+    int solutions = 0;
+    for (int num = 1; num <= 9; num++) {
+        bool valid = true;
+        
+        for (int x = 0; x < BOARD_WIDTH; x++) {
+            if (x != col && board[row][x].player_num == num) {
+                valid = false;
+                break;
+            }
+        }
+        
+        if (valid) {
+            for (int y = 0; y < BOARD_HEIGHT; y++) {
+                if (y != row && board[y][col].player_num == num) {
+                    valid = false;
+                    break;
+                }
+            }
+        }
+        
+        if (valid) {
+            int box_start_row = (row / 3) * 3;
+            int box_start_col = (col / 3) * 3;
+            for (int y = box_start_row; y < box_start_row + 3; y++) {
+                for (int x = box_start_col; x < box_start_col + 3; x++) {
+                    if ((y != row || x != col) && board[y][x].player_num == num) {
+                        valid = false;
+                        break;
+                    }
+                }
+                if (!valid) break;
+            }
+        }
+        
+        if (valid) {
+            board[row][col].player_num = num;
+            solutions += count_solutions(next_row, next_col, limit);
+            board[row][col].player_num = 0;
+            
+            if (solutions > limit) {
+                return solutions;
+            }
+        }
+    }
+    
+    return solutions;
 }
 
 static bool win_check() {
@@ -186,18 +244,34 @@ static void gen_board() {
 
     int cells_to_remove = 40;
 
-    for (int i = 0; i < cells_to_remove; i++) {
-        int y = rand() % BOARD_HEIGHT;
-        int x = rand() % BOARD_WIDTH;
+    for (int i = 0; i < cells_to_remove; i ++){ 
+        int attempts = 0;
+        bool found = false;
 
-        while (board[y][x].player_num == 0) {
-            y = rand() % BOARD_HEIGHT;
-            x = rand() % BOARD_WIDTH;
+        while (attempts < 100 && !found) {
+            int y = rand() % BOARD_HEIGHT;
+            int x = rand() % BOARD_WIDTH;
+
+            if (board[y][x].player_num == 0) {
+                attempts++;
+                continue;
+            }
+
+            int temp = board[y][x].player_num;
+            board[y][x].player_num = 0;
+
+            if (count_solutions(0,0,2) == 1) {
+                board[y][x].preloaded = false;
+                found = true;
+            } else {
+                board[y][x].player_num = temp;
+            }
+            attempts++;
         }
-        board[y][x].player_num = 0;
-        board[y][x].preloaded = false; 
+        if (!found) {
+            break;
+        }
     }
-
 }
 
 static void render() {
