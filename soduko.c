@@ -288,8 +288,13 @@ static void render() {
         printf("║");
         for (int x = 0; x < BOARD_WIDTH; x++) {
             bool is_cursor = (x == player_pos.x && y == player_pos.y);
+            bool is_same_num = (board[y][x].player_num == board[player_pos.y][player_pos.x].player_num && board[y][x].player_num > 0);
 
-            if (is_cursor) printf("\033[7m");
+            if (is_cursor) {
+                printf("\033[7m");
+            } else if (is_same_num) {
+                printf("\033[48;5;208m");
+            }
             
             if (board[y][x].player_num == 0) {
                 printf("   ");
@@ -297,7 +302,7 @@ static void render() {
                 printf(" %d ", board[y][x].player_num);
             }
 
-            if (is_cursor) printf("\033[0m");
+            if (is_cursor || is_same_num) printf("\033[0m");
 
             if (x % 3 == 2) {
                 printf("║");
